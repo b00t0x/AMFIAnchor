@@ -5,8 +5,11 @@ hooks. It can run independently for custom-signed components or coexist with
 stock AMFIPass for Dortania-signed OCLP payloads. It does not modify OCLP detection,
 impersonate AMFIPass, or inject boot arguments.
 
-The current build accepts Darwin 25 only. Other kernels require a reviewed ABI and
-live qualification before the guard is widened. There is no beta override.
+The engine accepts Darwin 20 through 25 (Big Sur through Tahoe). The CoreTrust
+certificate layout and root policy are shared across these families; no
+per-OS anchor table or hook implementation is selected. Other kernel families
+require a reviewed ABI and live qualification before the guard is widened.
+There is no beta override.
 
 ## Source map
 
@@ -31,11 +34,25 @@ receive platform trust; this is not restricted to GPU bundles. Keep its private
 keys secret, including keys used by an accepted test injector. Public certificates
 and SPKI/SKID values are not private keys.
 
-The policy hook always calls the original and changes the result only for a
-registered public key. The lookup hook always calls the original and supplies an
+The policy hook preserves native evaluation and applies additional policy only
+for a registered public key. The lookup hook always calls the original and supplies an
 additional root only when native lookup misses. Unregistered libraries and modified
 signed code remain subject to normal validation. Positive and negative controls
 must be checked when changing these paths.
+
+Before routing, the policy hook checks the native entry for `test rdi,rdi` followed
+by `jz rel32` to a `ret` inside the loaded CoreTrust image. Lilu copies that relative
+branch into its trampoline without adjusting the displacement. When this exact
+native NULL no-op is recognised, the wrapper reproduces it by omitting only the
+native call for NULL policy. Registered-anchor processing still follows. Other
+calls retain the original function call. The policy function has a void ABI;
+anchor trust is written to the certificate's policy flags.
+
+This decision is made from the loaded function's bytes, not an OS-version table.
+It does not widen the supported kernel range. The recognition flag is published
+with release ordering before routing exposes the wrapper, which reads it with
+acquire ordering. IORegistry exposes `NativeNullPolicyNoOp`, `NullPolicyCalls`,
+and `NullPolicyNativeSkipped` without publishing kernel addresses.
 
 The caller that controls installed kexts and boot configuration chooses the trust
 sources. There is no runtime user client or API to accept anchors from ordinary

@@ -4,9 +4,10 @@ AMFIAnchor is a Lilu plugin that adds explicitly configured signing anchors to
 CoreTrust. Anchor data lives in separate codeless injector kexts, so updating the
 engine does not require editing its `Info.plist`.
 
-The initial public source supports **x86_64 macOS Tahoe / Darwin 25**. Earlier
-private prototypes covered other kernel generations; that does not qualify this
-provider-based implementation for those systems.
+AMFIAnchor targets **x86_64 macOS Big Sur through Tahoe / Darwin 20-25**.
+The same engine and codeless provider format are used across these kernel
+families. See [the validation record](Docs/Validation.md) for tested builds and
+configurations.
 
 ## Usage
 

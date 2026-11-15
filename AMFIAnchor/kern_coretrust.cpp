@@ -16,6 +16,9 @@ mach_vm_address_t CoreTrustPolicy::lookupEntry {0};
 CoreTrustPolicy::InstallStatus CoreTrustPolicy::installStatus {InstallStatus::Pending};
 uint64_t CoreTrustPolicy::policyCalls {0};
 uint64_t CoreTrustPolicy::lookupCalls {0};
+uint64_t CoreTrustPolicy::nullPolicyCalls {0};
+uint64_t CoreTrustPolicy::nullPolicyNativeSkipped {0};
+bool CoreTrustPolicy::nativeNullPolicyNoOp {false};
 KernelPatcher::KextInfo CoreTrustPolicy::coreTrust {
     "com.apple.kext.CoreTrust", coreTrustPaths, arrsize(coreTrustPaths), {true}, {}, 0
 };
@@ -24,7 +27,9 @@ LiluAPI::Error CoreTrustPolicy::init() {
 	return lilu.onKextLoad(&coreTrust, 1, processKext, nullptr);
 }
 
-void CoreTrustPolicy::processKext(void *, KernelPatcher &patcher, size_t index, mach_vm_address_t, size_t) {
+void CoreTrustPolicy::processKext(
+    void *, KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size
+) {
 	if (index != coreTrust.loadIndex || installStatus != InstallStatus::Pending) {
 		return;
 	}
@@ -48,6 +53,10 @@ void CoreTrustPolicy::processKext(void *, KernelPatcher &patcher, size_t index, 
 		return;
 	}
 
+	// Inspect the native entry before routing replaces its bytes. Publish the
+	// result before the hook can run; each policy call only reads this flag.
+	__atomic_store_n(&nativeNullPolicyNoOp, hasNullPolicyNoOp(policyEntry, address, size), __ATOMIC_RELEASE);
+
 	KernelPatcher::RouteRequest requests[] {
 	    {"_X509PolicySetFlagsForRoots", wrapSetRootPolicy, orgSetRootPolicy},
 	    {"_X509ChainGetAppleRootUsingKeyIdentifier", wrapFindRoot, orgFindRoot}
@@ -60,13 +69,39 @@ void CoreTrustPolicy::processKext(void *, KernelPatcher &patcher, size_t index, 
 	patcher.clearError();
 }
 
-uint64_t CoreTrustPolicy::wrapSetRootPolicy(const void *policy, void *certificate) {
-	__atomic_fetch_add(&policyCalls, 1ULL, __ATOMIC_RELAXED);
-	uint64_t nativeResult = orgSetRootPolicy(policy, certificate);
-	if (anchorRegistry.applyRootPolicy(static_cast<CoreTrust::Certificate *>(certificate))) {
-		return CoreTrust::AdditionalRootPolicy;
+bool CoreTrustPolicy::hasNullPolicyNoOp(mach_vm_address_t entry, mach_vm_address_t address, size_t size) {
+	// Observed native prefix: test rdi,rdi (3 bytes), jz rel32 (6 bytes).
+	static constexpr size_t NullPolicyPrefixSize {9};
+	if (size < NullPolicyPrefixSize || entry < address || entry - address > size - NullPolicyPrefixSize) {
+		return false;
 	}
-	return nativeResult;
+	auto bytes = reinterpret_cast<const uint8_t *>(entry);
+	if (bytes[0] != 0x48 || bytes[1] != 0x85 || bytes[2] != 0xFF || bytes[3] != 0x0F || bytes[4] != 0x84) {
+		return false;
+	}
+	int32_t displacement = 0;
+	memcpy(&displacement, bytes + 5, sizeof(displacement));
+	auto target = entry + NullPolicyPrefixSize + static_cast<mach_vm_address_t>(static_cast<int64_t>(displacement));
+	if (target < address || target - address >= size) {
+		return false;
+	}
+	return *reinterpret_cast<const uint8_t *>(target) == 0xC3;
+}
+
+void CoreTrustPolicy::wrapSetRootPolicy(const void *policy, void *certificate) {
+	__atomic_fetch_add(&policyCalls, 1ULL, __ATOMIC_RELAXED);
+	if (!policy) {
+		__atomic_fetch_add(&nullPolicyCalls, 1ULL, __ATOMIC_RELAXED);
+	}
+	if (!policy && __atomic_load_n(&nativeNullPolicyNoOp, __ATOMIC_ACQUIRE)) {
+		// Lilu copies this relative branch without relocating it. The validated
+		// native NULL path only returns, so preserve that no-op here instead.
+		__atomic_fetch_add(&nullPolicyNativeSkipped, 1ULL, __ATOMIC_RELAXED);
+	} else {
+		orgSetRootPolicy(policy, certificate);
+	}
+	// Additional anchors still receive their policy when native evaluation is a no-op.
+	anchorRegistry.applyRootPolicy(static_cast<CoreTrust::Certificate *>(certificate));
 }
 
 void *CoreTrustPolicy::wrapFindRoot(const void *keyIdentifier, bool allowTestRoots) {
@@ -103,6 +138,11 @@ void CoreTrustPolicy::publishProperties(OSDictionary *properties) {
 	setDiagnosticNumber(properties, "InstallStatus", static_cast<uint32_t>(installStatus));
 	setDiagnosticNumber(properties, "FlagsCalls", __atomic_load_n(&policyCalls, __ATOMIC_RELAXED));
 	setDiagnosticNumber(properties, "LookupCalls", __atomic_load_n(&lookupCalls, __ATOMIC_RELAXED));
+	setDiagnosticNumber(properties, "NullPolicyCalls", __atomic_load_n(&nullPolicyCalls, __ATOMIC_RELAXED));
+	setDiagnosticNumber(
+	    properties, "NullPolicyNativeSkipped", __atomic_load_n(&nullPolicyNativeSkipped, __ATOMIC_RELAXED)
+	);
+	setDiagnosticNumber(properties, "NativeNullPolicyNoOp", __atomic_load_n(&nativeNullPolicyNoOp, __ATOMIC_ACQUIRE));
 
 	// These are observations, not evidence that an unknown later hook preserves
 	// our callbacks. Signed controls and per-anchor counters establish coexistence.

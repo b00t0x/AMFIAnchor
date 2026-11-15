@@ -88,7 +88,8 @@ extern "C" kern_return_t anchorStart(kmod_info_t *, void *) {
 		return KERN_FAILURE;
 	}
 
-	if (getKernelVersion() != KernelVersion::Tahoe || !anchorRegistry.init()) {
+	if (getKernelVersion() < KernelVersion::BigSur || getKernelVersion() > KernelVersion::Tahoe ||
+	    !anchorRegistry.init()) {
 		SYSLOG("init", "unsupported kernel or anchor registry allocation failure");
 		lilu.releaseAccess();
 		return KERN_FAILURE;

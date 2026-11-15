@@ -11,8 +11,8 @@ class OSDictionary;
 /**
  *  The private CoreTrust ABI used by the two root-selection hooks.
  *
- *  Recovered during compatibility analysis of AMFIPass 1.4.1 and verified on
- *  Darwin 25. These offsets and policy bits are not a supported Apple API.
+ *  Recovered during compatibility analysis of AMFIPass 1.4.1 for Darwin 20-25.
+ *  These offsets and policy bits are not a supported Apple API.
  *  See Docs/Design.md before extending support to another kernel generation.
  */
 namespace CoreTrust {
@@ -49,7 +49,7 @@ public:
 	static void publishProperties(OSDictionary *properties);
 
 private:
-	using PolicyFunction = uint64_t (*)(const void *, void *);
+	using PolicyFunction = void (*)(const void *, void *);
 	using LookupFunction = void *(*)(const void *, bool);
 
 	enum class InstallStatus : uint32_t { Pending = 0, Installed, PreexistingShortRoute, MissingSymbol, RoutingFailed };
@@ -61,12 +61,18 @@ private:
 	static InstallStatus installStatus;
 	static uint64_t policyCalls;
 	static uint64_t lookupCalls;
+	static uint64_t nullPolicyCalls;
+	static uint64_t nullPolicyNativeSkipped;
+	static bool nativeNullPolicyNoOp;
 	static KernelPatcher::KextInfo coreTrust;
 
 	static void processKext(void *user, KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size);
 
-	/** Preserve native policy evaluation, then recognise only registered public keys. */
-	static uint64_t wrapSetRootPolicy(const void *policy, void *certificate);
+	/** Recognise a native NULL branch that only returns, before replacing the entry. */
+	static bool hasNullPolicyNoOp(mach_vm_address_t entry, mach_vm_address_t address, size_t size);
+
+	/** Preserve native policy evaluation, including a validated NULL no-op, then match registered keys. */
+	static void wrapSetRootPolicy(const void *policy, void *certificate);
 
 	/** Preserve native root lookup and consult additional anchors only on a miss. */
 	static void *wrapFindRoot(const void *keyIdentifier, bool allowTestRoots);
