@@ -1,0 +1,12 @@
+/build/
+/Lilu/
+/MacKernelSDK/
+/reference-materials/
+.DS_Store
+__pycache__/
+*.pyc
+*.pem
+*.key
+*.p12
+*.pfx
+*.der

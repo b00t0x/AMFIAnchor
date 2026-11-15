@@ -1,0 +1,29 @@
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++14
+UseTab: ForIndentation
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 4
+ColumnLimit: 120
+BreakBeforeBraces: Attach
+IndentCaseLabels: true
+AccessModifierOffset: -4
+PointerAlignment: Right
+ReferenceAlignment: Right
+DerivePointerAlignment: false
+SpaceBeforeCpp11BracedList: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+InsertBraces: true
+BinPackArguments: false
+BinPackParameters: false
+AlignAfterOpenBracket: BlockIndent
+SortIncludes: Never
+ReflowComments: false
+StatementMacros:
+  - OSDeclareDefaultStructors
+  - OSDefineMetaClassAndStructors
+  - KMOD_EXPLICIT_DECL
