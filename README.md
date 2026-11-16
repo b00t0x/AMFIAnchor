@@ -7,8 +7,9 @@ engine does not require editing its `Info.plist`.
 AMFIAnchor targets **x86_64 macOS Big Sur through Tahoe / Darwin 20-25**.
 The same engine and codeless provider format are used across these kernel
 families. See [the validation record](Docs/Validation.md) for tested builds and
-configurations. A Sonoma graphics-driver shutdown hang remains unresolved;
-see that record before treating restart stability as qualified.
+configurations. A Sonoma graphics-driver shutdown hang also reproduced with
+the original modified AMFIPass and no AMFIAnchor loaded; its cause remains
+unresolved. See that record before treating restart stability as qualified.
 
 ## Usage
 

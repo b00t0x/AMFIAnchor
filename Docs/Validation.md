@@ -38,6 +38,28 @@ plugins loaded; the next EFI configuration had not taken effect. A power cycle
 recovered Sonoma, where the standalone runtime controls then passed. This does
 not establish the cause of the shutdown failure or qualify every restart path.
 
+### Control with the original modified AMFIPass
+
+Later on 2026-11-16, the original modified AMFIPass bundle and its original
+OpenCore configuration were restored. AMFIAnchor, its prototype, and the anchor
+injectors were neither enabled nor loaded. WEX, Lilu, installed graphics files,
+and kernel collections were unchanged.
+
+The comparison attempted twelve warm restarts across Ventura 22H730, Sonoma
+23J631, and Sequoia 24H232. Ten reached a new boot and passed the same signing,
+loaded-artifact, and ten-test GPU controls. The fourth attempt stopped at a
+black screen; its GPU cause could not be established after recovery. The
+twelfth attempt reproduced a GPU register dump and `Trying to restart GPU`
+during Sonoma shutdown. Continuous capture showed shutdown completing its
+userspace teardown before the dump, without reaching BIOS. Two final images
+47 seconds apart were identical. Testing stopped at this reproduction, before
+the planned limit of fifteen restarts.
+
+This demonstrates that the shutdown GPU failure can occur without AMFIAnchor
+or its injectors. It does not identify the introducing graphics revision or
+establish a common cause for every earlier failure. Restart stability remains
+unqualified; the successful runtime controls above remain separate evidence.
+
 ### Signing and graphics controls
 
 | Control, on all six OS builds | Standalone | Stock AMFIPass, manual `-amfipassbeta` |
