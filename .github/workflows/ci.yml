@@ -9,12 +9,12 @@ permissions:
 
 jobs:
   style-and-tools:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - run: python -m pip install clang-format==17.0.6
@@ -28,16 +28,16 @@ jobs:
       matrix:
         configuration: [Release, Debug]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: acidanthera/Lilu
           ref: e4748cc081bf060302c7d3c44a643ce1d11b7e1d
           path: Lilu
           persist-credentials: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: acidanthera/MacKernelSDK
           ref: 05094e5e88cec7caedbfb35e8449ed0db94bf95b

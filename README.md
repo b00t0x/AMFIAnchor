@@ -11,6 +11,9 @@ whose signer you trust.
 
 ## Install with OpenCore
 
+Use the Release ZIP from [GitHub Actions](https://github.com/b00t0x/AMFIAnchor/actions)
+or [build from source](CONTRIBUTING.md).
+
 1. Copy `AMFIAnchor.kext` and the anchor kext or kexts you need to `EFI/OC/Kexts`.
    Use Lilu 1.7.2 or later.
 2. Add and enable the entries in `Kernel -> Add` in this order:
