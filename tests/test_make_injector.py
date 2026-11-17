@@ -116,6 +116,7 @@ class InjectorTests(unittest.TestCase):
         self.assertEqual([path for path in bundle.rglob("*") if path.is_file()], [info_path])
         info = plistlib.loads(info_path.read_bytes())
         identifier = info["CFBundleIdentifier"]
+        self.assertEqual(identifier, "org.b00t0x.AMFIAnchorInjector")
         provider = info["IOKitPersonalities"][identifier]
         config = provider["AMFIAnchorConfig"]
         self.assertNotIn("CFBundleExecutable", info)
@@ -124,6 +125,7 @@ class InjectorTests(unittest.TestCase):
         self.assertEqual(provider["CFBundleIdentifier"], injector.ENGINE_IDENTIFIER)
         self.assertEqual(provider["IOClass"], "AMFIAnchorProvider")
         self.assertEqual(provider["IOMatchCategory"], identifier)
+        self.assertEqual(provider["AMFIAnchorProviderID"], identifier)
         self.assertEqual(config["SchemaVersion"], 1)
         self.assertEqual(list(config["Anchors"]), ["b00t0x"])
         anchor = config["Anchors"]["b00t0x"]

@@ -4,10 +4,10 @@ AMFIAnchor is a Lilu plugin for running components signed by an explicitly
 trusted CA on **x86_64 macOS Big Sur through Tahoe** with AMFI enabled.
 
 `AMFIAnchor.kext` loads anchors from separate codeless kexts. The bundled
-`AMFIAnchorInjector.kext` provides the signing anchor used by WEX and other
-components signed under the same CA. Each anchor grants platform trust
-to the supported signing hierarchy across the system. Install only anchors
-whose signer you trust.
+`AMFIAnchorInjector.kext` provides the signing anchor used by
+[WhateverXe-Graphics] and other components signed under the same CA. Each
+anchor grants platform trust to the supported signing hierarchy across the
+system. Install only anchors whose signer you trust.
 
 ## Install with OpenCore
 
@@ -30,8 +30,9 @@ or [build from source](CONTRIBUTING.md).
    `MaxKernel` to `25.99.99`. For OCLP on Tahoe with stock AMFIPass 1.4.1,
    make sure its entry allows Darwin 25 and add `-amfipassbeta` to `boot-args`.
    AMFIAnchor runs without that flag or AMFIPass.
-   When replacing an older injector for the WEX signing CA, update its
-   `BundlePath` to `AMFIAnchorInjector.kext`. Enable only one injector for the same CA.
+   When replacing an older injector for the [WhateverXe-Graphics] signing CA,
+   update its `BundlePath` to `AMFIAnchorInjector.kext`. Enable only one injector
+   for the same CA.
 3. Reboot. To confirm registration, run `ioreg -r -c AMFIAnchor -l` and check
    that `InstallStatus` is 1 and `LoadedAnchors` contains your anchor.
 
@@ -45,3 +46,5 @@ or [build from source](CONTRIBUTING.md).
 AMFIAnchor is independently implemented following compatibility analysis of
 AMFIPass 1.4.1 and CoreTrust. See [NOTICES.md](NOTICES.md) for research
 attribution, build dependencies, and license notices.
+
+[WhateverXe-Graphics]: https://github.com/b00t0x/WhateverXe-Graphics

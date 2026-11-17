@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>org.b00t0x.AMFIAnchorInjector.b00t0x</string>
+	<string>org.b00t0x.AMFIAnchorInjector</string>
 	<key>CFBundleName</key>
 	<string>AMFIAnchorInjector</string>
 	<key>CFBundlePackageType</key>
@@ -14,7 +14,7 @@
 	<string>1.0.0</string>
 	<key>IOKitPersonalities</key>
 	<dict>
-		<key>org.b00t0x.AMFIAnchorInjector.b00t0x</key>
+		<key>org.b00t0x.AMFIAnchorInjector</key>
 		<dict>
 			<key>AMFIAnchorConfig</key>
 			<dict>
@@ -64,13 +64,13 @@
 				<integer>1</integer>
 			</dict>
 			<key>AMFIAnchorProviderID</key>
-			<string>org.b00t0x.AMFIAnchorInjector.b00t0x</string>
+			<string>org.b00t0x.AMFIAnchorInjector</string>
 			<key>CFBundleIdentifier</key>
 			<string>org.b00t0x.AMFIAnchor</string>
 			<key>IOClass</key>
 			<string>AMFIAnchorProvider</string>
 			<key>IOMatchCategory</key>
-			<string>org.b00t0x.AMFIAnchorInjector.b00t0x</string>
+			<string>org.b00t0x.AMFIAnchorInjector</string>
 			<key>IOProviderClass</key>
 			<string>IOResources</string>
 			<key>IOResourceMatch</key>
