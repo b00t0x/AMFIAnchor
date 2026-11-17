@@ -24,7 +24,7 @@ The tests matched loaded kext UUIDs to the artifacts from
 | Release standalone | `F9A49061-B962-3F82-B803-10B1647A1668` | Passed |
 | Release with stock AMFIPass 1.4.1 after AMFIAnchor | `F9A49061-B962-3F82-B803-10B1647A1668` | Passed |
 
-AMFI and Library Validation stayed enabled. The bundled b00t0x injector and an
+AMFI and Library Validation stayed enabled. The bundled injector and an
 independent test injector each registered one anchor. Libraries under both
 anchors passed, unregistered and tampered libraries were rejected, and
 Dortania-signed libraries passed only with stock AMFIPass. All three boots used

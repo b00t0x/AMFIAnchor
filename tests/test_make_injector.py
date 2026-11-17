@@ -111,7 +111,7 @@ class InjectorTests(unittest.TestCase):
             self.assertFalse((bundle / "Contents").exists())
 
     def test_bundled_injector_keeps_the_wex_signing_anchor(self):
-        bundle = ROOT / "Injectors" / "AMFIAnchor-b00t0x.kext"
+        bundle = ROOT / "Injectors" / "AMFIAnchorInjector.kext"
         info_path = bundle / "Contents" / "Info.plist"
         self.assertEqual([path for path in bundle.rglob("*") if path.is_file()], [info_path])
         info = plistlib.loads(info_path.read_bytes())

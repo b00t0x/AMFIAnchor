@@ -4,8 +4,8 @@ AMFIAnchor is a Lilu plugin for running components signed by an explicitly
 trusted CA on **x86_64 macOS Big Sur through Tahoe** with AMFI enabled.
 
 `AMFIAnchor.kext` loads anchors from separate codeless kexts. The bundled
-`AMFIAnchor-b00t0x.kext` provides the signing anchor used by WEX and other
-b00t0x components signed under the same CA. Each anchor grants platform trust
+`AMFIAnchorInjector.kext` provides the signing anchor used by WEX and other
+components signed under the same CA. Each anchor grants platform trust
 to the supported signing hierarchy across the system. Install only anchors
 whose signer you trust.
 
@@ -22,7 +22,7 @@ or [build from source](CONTRIBUTING.md).
    | --- | --- | --- |
    | 1 | `Lilu.kext` | `Contents/MacOS/Lilu` |
    | 2 | `AMFIAnchor.kext` | `Contents/MacOS/AMFIAnchor` |
-   | 3 | `AMFIAnchor-b00t0x.kext` or your own anchor kext | Empty string |
+   | 3 | `AMFIAnchorInjector.kext` or your own anchor kext | Empty string |
    | 4 | `AMFIPass.kext` (optional, for OCLP) | `Contents/MacOS/AMFIPass` |
 
    Set `PlistPath` to `Contents/Info.plist` for each entry. Keep AMFI enabled.
@@ -30,8 +30,8 @@ or [build from source](CONTRIBUTING.md).
    `MaxKernel` to `25.99.99`. For OCLP on Tahoe with stock AMFIPass 1.4.1,
    make sure its entry allows Darwin 25 and add `-amfipassbeta` to `boot-args`.
    AMFIAnchor runs without that flag or AMFIPass.
-   When migrating from the older WEX injector, replace its entry with
-   `AMFIAnchor-b00t0x.kext`. Enable only one injector for the same CA.
+   When replacing an older injector for the WEX signing CA, update its
+   `BundlePath` to `AMFIAnchorInjector.kext`. Enable only one injector for the same CA.
 3. Reboot. To confirm registration, run `ioreg -r -c AMFIAnchor -l` and check
    that `InstallStatus` is 1 and `LoadedAnchors` contains your anchor.
 

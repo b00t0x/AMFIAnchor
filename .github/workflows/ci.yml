@@ -51,7 +51,7 @@ jobs:
           distribution="AMFIAnchor-$CONFIGURATION"
           stage="$RUNNER_TEMP/$distribution"
           mkdir "$stage"
-          cp -R "build/$CONFIGURATION/AMFIAnchor.kext" Injectors/AMFIAnchor-b00t0x.kext "$stage/"
+          cp -R "build/$CONFIGURATION/AMFIAnchor.kext" Injectors/AMFIAnchorInjector.kext "$stage/"
           cp "build/$CONFIGURATION/manifest.json" LICENSE.txt NOTICES.md "$stage/"
           cp -R LICENSES "$stage/"
           ditto -c -k --norsrc --keepParent "$stage" "build/$distribution.zip"

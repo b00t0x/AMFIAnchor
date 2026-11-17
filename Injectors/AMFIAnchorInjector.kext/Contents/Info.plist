@@ -5,7 +5,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>org.b00t0x.AMFIAnchorInjector.b00t0x</string>
 	<key>CFBundleName</key>
-	<string>AMFIAnchor-b00t0x</string>
+	<string>AMFIAnchorInjector</string>
 	<key>CFBundlePackageType</key>
 	<string>KEXT</string>
 	<key>CFBundleShortVersionString</key>
