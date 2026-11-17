@@ -5,11 +5,38 @@
 The standard Lilu startup candidate passed the source checks, all seven injector
 tests, and both builds. The Release and Debug binaries both use the Lilu module
 entry and retain the native NULL guard. Hook-call and match counters appear
-only in Debug. The hardware results below apply to the earlier implementation.
+only in Debug.
 
 Version 0.1.2 passed clang-format 17 and the repository whitespace, SPDX, and
 Python syntax checks, all six injector tests, and Release and Debug builds
 against the dependency revisions in `NOTICES.md`.
+
+## Standard Lilu startup on Sequoia
+
+On 2026-11-17, the Debug and Release artifacts built from `6977cfd` passed on
+Sequoia 24H232 on an Intel Core i7-12700H / Iris Xe system with Lilu 1.7.2.
+The tests matched loaded kext UUIDs to the artifacts from
+[CI run 44060033913](https://github.com/b00t0x/AMFIAnchor/actions/runs/44060033913).
+
+| Configuration | AMFIAnchor UUID | Desktop, signature controls, and GPU checks |
+| --- | --- | --- |
+| Debug standalone | `9DBC0A71-5D33-33A8-9FA1-41D83ECA7693` | Passed |
+| Release standalone | `F9A49061-B962-3F82-B803-10B1647A1668` | Passed |
+| Release with stock AMFIPass 1.4.1 after AMFIAnchor | `F9A49061-B962-3F82-B803-10B1647A1668` | Passed |
+
+AMFI and Library Validation stayed enabled. The bundled b00t0x injector and an
+independent test injector each registered one anchor. Libraries under both
+anchors passed, unregistered and tampered libraries were rejected, and
+Dortania-signed libraries passed only with stock AMFIPass. All three boots used
+Sequoia without `-amfipassbeta`. The signed executable controls also verified
+the platform flag for both registered anchors and SIGKILL for tampered samples.
+
+Debug recognised the native NULL no-op and skipped the native trampoline for
+all 704 observed NULL policy calls. Both Release runs reported successful
+installation and loaded anchors through IORegistry. Each run passed ten GPU
+tests with the same WindowServer PID throughout the suite. The three boots
+reached the desktop without an early reboot or a hang. This is a targeted
+Sequoia check of the standard startup, with earlier cross-OS results below.
 
 ## Version 0.1.2: Big Sur through Tahoe
 
