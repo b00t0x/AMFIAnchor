@@ -10,6 +10,12 @@ python3 -m unittest discover -s tests -v
 python3 tools/build.py --lilu /path/to/Lilu/Lilu --sdk /path/to/MacKernelSDK
 ```
 
+Build on macOS with the Xcode command-line tools and Python 3.9 or later.
+Use the dependency revisions in [NOTICES.md](NOTICES.md). The build produces
+`build/Release/AMFIAnchor.kext` and its hash manifest. Use `--configuration Debug`
+for a debug build. CI builds both configurations and packages each with the
+bundled anchor.
+
 Use clang-format 17 for C++ formatting. `python3 tools/check_style.py --fix`
 formats C++ in place. Review comments and names manually as well.
 

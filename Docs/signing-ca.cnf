@@ -1,0 +1,27 @@
+[req]
+prompt = no
+distinguished_name = subject
+
+[subject]
+
+[root_ca]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always
+keyUsage = critical,keyCertSign,cRLSign
+
+[intermediate_ca]
+basicConstraints = critical,CA:TRUE,pathlen:0
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always
+keyUsage = critical,digitalSignature,keyCertSign,cRLSign
+extendedKeyUsage = critical,codeSigning
+1.2.840.113635.100.6.22 = DER:05:00
+
+[code_signing]
+basicConstraints = critical,CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always
+keyUsage = critical,digitalSignature
+extendedKeyUsage = critical,codeSigning
+1.2.840.113635.100.6.22 = DER:05:00

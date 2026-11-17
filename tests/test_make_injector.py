@@ -4,6 +4,7 @@
 
 """Exercise the public-certificate boundary and codeless-provider contract."""
 
+import hashlib
 import importlib.util
 from pathlib import Path
 import plistlib
@@ -108,6 +109,30 @@ class InjectorTests(unittest.TestCase):
                 injector.make_injector(bundle, "org.example.Existing", "Anchor", self.certificate)
             self.assertEqual(marker.read_text(), "existing content")
             self.assertFalse((bundle / "Contents").exists())
+
+    def test_bundled_injector_keeps_the_wex_signing_anchor(self):
+        bundle = ROOT / "Injectors" / "AMFIAnchor-b00t0x.kext"
+        info_path = bundle / "Contents" / "Info.plist"
+        self.assertEqual([path for path in bundle.rglob("*") if path.is_file()], [info_path])
+        info = plistlib.loads(info_path.read_bytes())
+        identifier = info["CFBundleIdentifier"]
+        provider = info["IOKitPersonalities"][identifier]
+        config = provider["AMFIAnchorConfig"]
+        self.assertNotIn("CFBundleExecutable", info)
+        self.assertEqual(info["CFBundleName"], bundle.stem)
+        self.assertEqual(info["OSBundleLibraries"], {injector.ENGINE_IDENTIFIER: "0.1.0"})
+        self.assertEqual(provider["CFBundleIdentifier"], injector.ENGINE_IDENTIFIER)
+        self.assertEqual(provider["IOClass"], "AMFIAnchorProvider")
+        self.assertEqual(provider["IOMatchCategory"], identifier)
+        self.assertEqual(config["SchemaVersion"], 1)
+        self.assertEqual(list(config["Anchors"]), ["b00t0x"])
+        anchor = config["Anchors"]["b00t0x"]
+        self.assertTrue(anchor["Enabled"])
+        self.assertEqual(anchor["SKID"].hex(), "55dc97886cd4a8562408947435b8e5c3d0e1b0c0")
+        self.assertEqual(
+            hashlib.sha256(anchor["SPKI"]).hexdigest(),
+            "19212ca6a6bf9658617d493cd851f34b3f542aed3b6a95a455143b477e032c7b",
+        )
 
 
 if __name__ == "__main__":

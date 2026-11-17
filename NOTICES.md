@@ -31,5 +31,6 @@ license; this table is not a claim that every SDK file has one license.
 - [Acidanthera style references](Docs/CodingStyle.md) informed naming, layout,
   and hook terminology. AMFIAnchor's additional auditability rules are its own.
 
-The repository contains no Apple or AMFIPass originals, decompiler output,
-deployment certificates, or signing private keys.
+`Injectors/AMFIAnchor-b00t0x.kext` contains the public SPKI and SKID for the
+signing CA used by WEX. The repository contains no Apple or AMFIPass originals,
+decompiler output, deployment certificates, or signing private keys.
