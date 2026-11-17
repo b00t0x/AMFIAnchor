@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: acidanthera/MacKernelSDK
-          ref: 418bf14c9fa6044e628eaee4e4da3479ceebd3cb
+          ref: 05094e5e88cec7caedbfb35e8449ed0db94bf95b
           path: MacKernelSDK
           persist-credentials: false
       - run: python3 tools/build.py --configuration ${{ matrix.configuration }}
