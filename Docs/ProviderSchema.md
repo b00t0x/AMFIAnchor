@@ -65,14 +65,16 @@ ioreg -r -c AMFIAnchorProvider -l
 The engine exposes `Version`, `ProviderSchemaVersion`, `InstallStatus`,
 `AnchorCount`, `ProviderCount`, `AnchorReady`, `RejectedAnchors`,
 `DisabledAnchors`, and `LoadedAnchors`. Each loaded anchor has its ID, provider,
-SPKI byte count, and policy/lookup match counters. `FlagsCalls` and `LookupCalls`
-count all calls through the wrappers, not just accepted custom roots.
+and SPKI byte count.
 
 `InstallStatus` is 0 pending, 1 installed, 2 preexisting short route, 3 missing
-symbol, or 4 routing failure. Inspect failures before relying on the kext.
-`CoreTrustEntriesDirectToAMFIAnchor` and `CoreTrustEntriesReroutedLater` are
-entry-target observations; signed positive and negative controls are needed to
-prove that a later hook preserves the trust chain.
+symbol, 4 routing failure, or 5 callback registration failure. Inspect failures
+before relying on the kext.
+
+Debug builds add `FlagsCalls`, `LookupCalls`, `NativeNullPolicyNoOp`,
+`NullPolicyCalls`, `NullPolicyNativeSkipped`, and per-anchor `FlagsMatches` and
+`LookupMatches`. Use signed positive and negative controls to verify coexistence
+with other hooks.
 
 Each provider exposes `AnchorRegistrationStatus` (1 processed, 2 invalid),
 `RegisteredAnchorCount`, `RejectedAnchorCount`, and `DisabledAnchorCount`, along

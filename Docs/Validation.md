@@ -2,6 +2,11 @@
 
 ## Local checks
 
+The standard Lilu startup candidate passed the source checks, all seven injector
+tests, and both builds. The Release and Debug binaries both use the Lilu module
+entry and retain the native NULL guard. Hook-call and match counters appear
+only in Debug. The hardware results below apply to the earlier implementation.
+
 Version 0.1.2 passed clang-format 17 and the repository whitespace, SPDX, and
 Python syntax checks, all six injector tests, and Release and Debug builds
 against the dependency revisions in `NOTICES.md`.

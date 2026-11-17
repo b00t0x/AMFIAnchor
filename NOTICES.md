@@ -14,9 +14,10 @@ directory names are the build script's defaults.
 | [Lilu](https://github.com/acidanthera/Lilu) | `e4748cc081bf060302c7d3c44a643ce1d11b7e1d` (1.7.2) | `Lilu/` | BSD-3-Clause, [notice](LICENSES/Lilu.txt) |
 | [MacKernelSDK](https://github.com/acidanthera/MacKernelSDK) | `05094e5e88cec7caedbfb35e8449ed0db94bf95b` | `MacKernelSDK/` | APSL-2.0 root license, [copy](LICENSES/MacKernelSDK.txt); individual files retain their own notices |
 
-The resulting kext includes code from the SDK's `libkmod.a` and uses Lilu's
-headers and runtime API. Retain the applicable dependency notices when
-redistributing binaries. Consult the SDK's per-file notices as well as its root
+The resulting kext includes code from the SDK's `libkmod.a` and Lilu's
+`Library/plugin_start.cpp`, and uses Lilu's headers and runtime API.
+Retain the applicable dependency notices when redistributing binaries.
+Consult the SDK's per-file notices as well as its root
 license; this table is not a claim that every SDK file has one license.
 
 ## Compatibility research

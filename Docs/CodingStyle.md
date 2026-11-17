@@ -47,8 +47,8 @@ These rules deliberately make control flow more explicit than some upstream exam
   Do not narrate each assignment or restate a clear identifier.
 - Keep CoreTrust ABI observations separate from supported Apple APIs. Explain
   the source of assumptions and the kernel generations actually validated.
-- Label diagnostics as observations. A changed entry target alone does not prove
-  that a later hook preserves this plugin; functional controls provide that proof.
+- Keep the hook install status and registered anchors visible in Release builds.
+  Use Debug builds for hook-call and anchor-match counters.
 - Comments and identifiers are English for shared review. Repository prose may
   include translations, but behavior contracts must agree.
 

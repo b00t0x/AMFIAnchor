@@ -61,8 +61,10 @@ private:
 		uint8_t keyIdentifier[KeyIdentifierSize] {};
 		char identifier[MaxIdentifierSize] {};
 		char providerIdentifier[MaxIdentifierSize] {};
+#if DEBUG
 		uint64_t policyMatches {0};
 		uint64_t lookupMatches {0};
+#endif
 	};
 
 	Anchor anchors[MaxAnchors] {};

@@ -43,7 +43,7 @@ static constexpr uint64_t AdditionalRootPolicy {0xE30653FFF8ULL};
 class CoreTrustPolicy {
 public:
 	/** Register the CoreTrust callback while the caller holds Lilu API access. */
-	static LiluAPI::Error init();
+	static void init();
 
 	/** Allocate an on-demand diagnostic snapshot, outside the trust hooks. */
 	static void publishProperties(OSDictionary *properties);
@@ -52,20 +52,29 @@ private:
 	using PolicyFunction = void (*)(const void *, void *);
 	using LookupFunction = void *(*)(const void *, bool);
 
-	enum class InstallStatus : uint32_t { Pending = 0, Installed, PreexistingShortRoute, MissingSymbol, RoutingFailed };
+	enum class InstallStatus : uint32_t {
+		Pending = 0,
+		Installed,
+		PreexistingShortRoute,
+		MissingSymbol,
+		RoutingFailed,
+		RegistrationFailed
+	};
 
 	static PolicyFunction orgSetRootPolicy;
 	static LookupFunction orgFindRoot;
-	static mach_vm_address_t policyEntry;
-	static mach_vm_address_t lookupEntry;
 	static InstallStatus installStatus;
+#if DEBUG
 	static uint64_t policyCalls;
 	static uint64_t lookupCalls;
 	static uint64_t nullPolicyCalls;
 	static uint64_t nullPolicyNativeSkipped;
+#endif
 	static bool nativeNullPolicyNoOp;
 	static KernelPatcher::KextInfo coreTrust;
 
+	static InstallStatus getInstallStatus();
+	static void setInstallStatus(InstallStatus status);
 	static void processKext(void *user, KernelPatcher &patcher, size_t index, mach_vm_address_t address, size_t size);
 
 	/** Recognise a native NULL branch that only returns, before replacing the entry. */
@@ -76,8 +85,6 @@ private:
 
 	/** Preserve native root lookup and consult additional anchors only on a miss. */
 	static void *wrapFindRoot(const void *keyIdentifier, bool allowTestRoots);
-
-	static mach_vm_address_t getRouteTarget(mach_vm_address_t address);
 };
 
 #endif /* kern_coretrust_hpp */

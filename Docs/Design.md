@@ -9,7 +9,7 @@ The engine accepts Darwin 20 through 25 (Big Sur through Tahoe). The CoreTrust
 certificate layout and root policy are shared across these families; no
 per-OS anchor table or hook implementation is selected. Other kernel families
 require a reviewed ABI and live qualification before the guard is widened.
-There is no beta override.
+The range remains strict even with Lilu's global beta override enabled.
 
 ## Source map
 
@@ -18,6 +18,11 @@ There is no beta override.
 | `kern_start.cpp` | Early Lilu registration, IOKit service, codeless providers |
 | `kern_anchor.hpp/cpp` | Bounded input validation, boot-lifetime ownership, lookup |
 | `kern_coretrust.hpp/cpp` | Private ABI, original-call preservation, Long routing |
+
+Lilu's standard `plugin_start.cpp` runs the `PluginConfiguration` callback
+during module start with Lilu API access held. The callback registers CoreTrust
+before IOKit starts the engine and codeless providers. The OpenCore load order
+determines the callback order when another plugin hooks CoreTrust.
 
 ```mermaid
 flowchart LR
@@ -51,8 +56,8 @@ anchor trust is written to the certificate's policy flags.
 This decision is made from the loaded function's bytes, not an OS-version table.
 It does not widen the supported kernel range. The recognition flag is published
 with release ordering before routing exposes the wrapper, which reads it with
-acquire ordering. IORegistry exposes `NativeNullPolicyNoOp`, `NullPolicyCalls`,
-and `NullPolicyNativeSkipped` without publishing kernel addresses.
+acquire ordering. Debug builds expose `NativeNullPolicyNoOp`, `NullPolicyCalls`,
+and `NullPolicyNativeSkipped` in IORegistry.
 
 The caller that controls installed kexts and boot configuration chooses the trust
 sources. There is no runtime user client or API to accept anchors from ordinary
@@ -66,8 +71,7 @@ entire entry before publishing its count with release ordering. Hooks acquire th
 count, allocate nothing, take no locks, and access only published entries.
 
 Key bytes and storage addresses do not change after publication. CoreTrust can
-write certificate policy flags. Counters use atomic operations; a diagnostic dump
-is not an atomic snapshot of all counters together.
+write certificate policy flags. Debug match counters use atomic operations.
 
 Accepted data lasts until reboot. Removing a provider does not revoke its already
 copied anchor. The implementation cannot unload safely after routing, and there
@@ -88,6 +92,4 @@ cannot prove that an unknown OS retains the same ABI.
 
 AMFIAnchor must register before another plugin's CoreTrust hook when coexisting.
 It requests Long routing so Lilu can preserve the chain. A preexisting short jump
-is rejected. Later entry targets are exposed only as boolean diagnostics, without
-publishing kernel pointer values; functionality must be established with signing
-controls and per-anchor counters.
+is rejected. Verify coexistence with signed positive and negative controls.

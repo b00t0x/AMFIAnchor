@@ -225,7 +225,9 @@ bool AnchorRegistry::applyRootPolicy(CoreTrust::Certificate *certificate) {
 	for (unsigned index = 0; index < count; index++) {
 		auto &anchor = anchors[index];
 		if (matches(&certificate->publicKey, anchor.publicKey, anchor.certificate.publicKey.length)) {
+#if DEBUG
 			__atomic_fetch_add(&anchor.policyMatches, 1ULL, __ATOMIC_RELAXED);
+#endif
 			certificate->policyFlags = CoreTrust::AdditionalRootPolicy;
 			return true;
 		}
@@ -238,7 +240,9 @@ CoreTrust::Certificate *AnchorRegistry::findRoot(const CoreTrust::OctetString *k
 	for (unsigned index = 0; index < count; index++) {
 		auto &anchor = anchors[index];
 		if (matches(keyIdentifier, anchor.keyIdentifier, KeyIdentifierSize)) {
+#if DEBUG
 			__atomic_fetch_add(&anchor.lookupMatches, 1ULL, __ATOMIC_RELAXED);
+#endif
 			return &anchor.certificate;
 		}
 	}
@@ -260,15 +264,17 @@ void AnchorRegistry::publishProperties(OSDictionary *properties) const {
 
 	for (unsigned index = 0; index < count; index++) {
 		const auto &anchor = anchors[index];
-		auto row = OSDictionary::withCapacity(5);
+		auto row = OSDictionary::withCapacity(DEBUG ? 5 : 3);
 		auto identifier = OSString::withCString(anchor.identifier);
 		auto provider = OSString::withCString(anchor.providerIdentifier);
 		if (row && identifier && provider) {
 			row->setObject("Identifier", identifier);
 			row->setObject("Provider", provider);
 			setDiagnosticNumber(row, "SPKIBytes", anchor.certificate.publicKey.length);
+#if DEBUG
 			setDiagnosticNumber(row, "FlagsMatches", __atomic_load_n(&anchor.policyMatches, __ATOMIC_RELAXED));
 			setDiagnosticNumber(row, "LookupMatches", __atomic_load_n(&anchor.lookupMatches, __ATOMIC_RELAXED));
+#endif
 			list->setObject(row);
 		}
 		if (identifier) {

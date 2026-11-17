@@ -37,8 +37,9 @@ def main():
     sdk = arguments.sdk.resolve()
     if (lilu / "Lilu" / "Headers").is_dir():
         lilu = lilu / "Lilu"
-    if not (lilu / "Headers" / "kern_api.hpp").is_file():
-        parser.error("--lilu must identify the Lilu source directory containing Headers")
+    lilu_bootstrap = lilu / "Library" / "plugin_start.cpp"
+    if not (lilu / "Headers" / "plugin_start.hpp").is_file() or not lilu_bootstrap.is_file():
+        parser.error("--lilu must identify the Lilu source directory containing Headers and Library/plugin_start.cpp")
     if not (sdk / "Library" / "x86_64" / "libkmod.a").is_file():
         parser.error("--sdk must identify a MacKernelSDK checkout with x86_64 libkmod.a")
 
@@ -55,7 +56,7 @@ def main():
         "-mkernel", "-fapple-kext", "-fno-exceptions", "-fno-rtti",
         "-fno-stack-protector", "-fno-builtin", "-mno-red-zone", "-nostdinc",
         "-DKERNEL", "-DKERNEL_PRIVATE", "-D__APPLE__", "-D__MACH__",
-        f"-DDEBUG={int(arguments.configuration == 'Debug')}",
+        f"-DDEBUG={int(arguments.configuration == 'Debug')}", "-DLILU_CUSTOM_IOKIT_INIT",
         "-DPRODUCT_NAME=AMFIAnchor", f"-DMODULE_VERSION={info['CFBundleVersion']}",
         "-isystem", str(sdk / "Headers"), "-isystem", str(lilu),
         "-mmacosx-version-min=10.15", "-Wall", "-Wextra", "-Werror",
@@ -65,7 +66,7 @@ def main():
         flags.extend([f"-fdebug-prefix-map={path}={label}", f"-ffile-prefix-map={path}={label}"])
 
     objects = []
-    for source in sorted(source_directory.glob("*.cpp")):
+    for source in sorted(source_directory.glob("*.cpp")) + [lilu_bootstrap]:
         object_path = output / f"{source.stem}.o"
         run(flags + ["-c", source, "-o", object_path])
         objects.append(object_path)
@@ -88,6 +89,7 @@ def main():
         "configuration": arguments.configuration,
         "uuid": uuid,
         "binary_sha256": sha256(binary),
+        "lilu_bootstrap_sha256": sha256(lilu_bootstrap),
         "source_files": {str(path.relative_to(ROOT)): sha256(path) for path in source_files},
         "files": {str(path.relative_to(bundle)): sha256(path) for path in bundle.rglob("*") if path.is_file()},
     }
